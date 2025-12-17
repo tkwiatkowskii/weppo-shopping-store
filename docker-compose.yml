@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: node_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+    depends_on:
+      - db
+    environment:
+      - ConnectionString="Host=db;Port=5432;Database=postgres;Username=postgres;Password=postgres"
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - db_data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:
