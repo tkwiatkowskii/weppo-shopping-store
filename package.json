@@ -1,0 +1,21 @@
+{
+  "name": "weppo-shopping-store",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkwiatkowskii/weppo-shopping-store.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
+}
