@@ -1,20 +1,38 @@
-import { Sequelize } from "sequelize";
+import { Sequelize } from 'sequelize';
+
+function getEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined) {
+    throw new Error(`Missing environment variable: ${name}`);
+  }
+  return value;
+}
+
+const DB_NAME = getEnv('DB_NAME');
+const DB_USER = getEnv('DB_USER');
+const DB_PASSWORD = getEnv('DB_PASSWORD');
+const DB_HOST = getEnv('DB_HOST');
+
+const DB_PORT: number = Number(process.env['DB_PORT']) || 5432;
+const DB_LOGGING: boolean = process.env['DB_LOGGING'] === 'true';
+const DB_RETRY_MAX: number = Number(process.env['DB_RETRY_MAX']) || 5;
+const DB_CONNECT_TIMEOUT: number =
+  Number(process.env['DB_CONNECT_TIMEOUT']) || 10000;
 
 const sequelize = new Sequelize(
-  'postgres',
-  'postgres',
-  'postgres',
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
   {
-    host: 'db',
-    port: 5432,
+    host: DB_HOST,
+    port: DB_PORT,
     dialect: 'postgres',
-    logging: false,
-    retry: {
-      max: 5
-    },
+    logging: DB_LOGGING ? console.log : false,
+    retry: { max: DB_RETRY_MAX },
     dialectOptions: {
-      connectTimeout: 10000
+      connectTimeout: DB_CONNECT_TIMEOUT
     }
   }
 );
+
 export default sequelize;
