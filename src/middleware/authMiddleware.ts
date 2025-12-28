@@ -5,8 +5,10 @@ export default function authMiddleware(
   req: Request, 
   res: Response, 
   next: NextFunction) {
-  const session = req.session as SessionData & { userId?: number; roles?: string[] };
   
+  // TS krzyczy inaczej
+  const session = req.session as SessionData & { userId?: number; roles?: string[] };
+
   if (!session.userId) {
     return res.redirect('/login');
   }

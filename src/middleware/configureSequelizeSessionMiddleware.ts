@@ -6,10 +6,13 @@ import type { Sequelize } from 'sequelize';
 const SequelizeStore = SequelizeStoreImport(session.Store);
 
 export function configureSequelizeSessionMiddleware(app: Express, sequelize: Sequelize) {
+  const store = new SequelizeStore({ db: sequelize }); 
+  store.sync();
+  
   app.use(
     session({
       secret: 'to_be_changed_later',
-      store: new SequelizeStore({ db: sequelize }),
+      store: store,
       resave: false,
       saveUninitialized: false,
       cookie: {
