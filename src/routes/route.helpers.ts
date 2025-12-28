@@ -1,4 +1,4 @@
-export function BindQueryParametersToModel<T>
+export function bindQueryParametersToModel<T>
   (req: any, model: T) {
 
   for (const key in model) {
@@ -8,4 +8,21 @@ export function BindQueryParametersToModel<T>
   }
 
   return model;
+}
+
+export function productIsValid(product: any): boolean {
+  return product && 
+    product.name && 
+    product.category && 
+    product.price !== null && 
+    product.stock !== null;
+}
+
+export function updatedProductIsValid(product: any): boolean {
+  return product && 
+    product.name && 
+    product.newName &&
+    product.newCategory && 
+    product.newPrice !== null && 
+    product.newStock !== null;
 }

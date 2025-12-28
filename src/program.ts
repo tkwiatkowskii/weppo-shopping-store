@@ -1,6 +1,6 @@
 import express, { ErrorRequestHandler} from 'express';
 import { sequelize } from './infrastructure/models/index.js';
-import { addProductsRoute, getProductsRoute } from './routes/products.routes.js';
+import { addProductsRoute, getProductsRoute, updateProductsRoute, deleteProductsRoute } from './routes/products.routes.js';
 
 try {
   await sequelize.authenticate();
@@ -27,6 +27,8 @@ const globalErrorHandler: ErrorRequestHandler =
 
 getProductsRoute(app);
 addProductsRoute(app);
+updateProductsRoute(app);
+deleteProductsRoute(app);
 
 app.use(globalErrorHandler);
 
