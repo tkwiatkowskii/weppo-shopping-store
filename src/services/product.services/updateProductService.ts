@@ -1,4 +1,4 @@
-import UpdateProductDto from "../../models/product.models/updateProductDto.js";
+import UpdateProductDto from "../../models/product.models/UpdateProductDto.js";
 import { Product } from "../../infrastructure/models/index.js";
 
 export default async function updateProductService(

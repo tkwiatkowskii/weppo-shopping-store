@@ -3,7 +3,7 @@ import ProductSearchParameters from '../models/product.models/ProductSearchParam
 import { bindQueryParametersToModel, productIsValid } from './route.helpers.js';
 import ProductController from '../controllers/ProductController.js';
 import { updatedProductIsValid } from './route.helpers.js';
-import UpdateProductDto from '../models/product.models/updateProductDto.js';
+import UpdateProductDto from '../models/product.models/UpdateProductDto.js';
 
 function getProductsRoute(app: Express) {
   app.get('/get-products', async (req, res, next) => {

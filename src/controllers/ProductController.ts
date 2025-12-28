@@ -3,7 +3,7 @@ import ProductDto from "../models/product.models/ProductDto.js";
 import ProductsSummaryDto from "../models/product.models/ProductsSummaryDto.js";
 import getProductsService from "../services/product.services/getProductsService.js";
 import createProductService from "../services/product.services/createProductService.js";
-import UpdateProductDto from "../models/product.models/updateProductDto.js";
+import UpdateProductDto from "../models/product.models/UpdateProductDto.js";
 import updateProductService from "../services/product.services/updateProductService.js";
 import deleteProductService from "../services/product.services/deleteProductService.js";
 
