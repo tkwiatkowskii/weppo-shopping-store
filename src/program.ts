@@ -1,6 +1,9 @@
 import express, { ErrorRequestHandler} from 'express';
 import { sequelize } from './infrastructure/models/index.js';
-import { addProductsRoute, getProductsRoute, updateProductsRoute, deleteProductsRoute } from './routes/products.routes.js';
+import bodyParser from 'body-parser';
+import { configureSequelizeSessionMiddleware } from './middleware/configureSequelizeSessionMiddleware.js';
+import authMiddleware from './middleware/authMiddleware.js';
+import productRouter from './routes/products.routes.js'
 
 try {
   await sequelize.authenticate();
@@ -14,7 +17,13 @@ const app = express();
 
 const PORT = 3000;
 
+configureSequelizeSessionMiddleware(app, sequelize);
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 const globalErrorHandler: ErrorRequestHandler =
   (err, _req, res, _next) => {
@@ -24,14 +33,20 @@ const globalErrorHandler: ErrorRequestHandler =
       message: 'Internal server error'
     });
   };
-
-getProductsRoute(app);
-addProductsRoute(app);
-updateProductsRoute(app);
-deleteProductsRoute(app);
+  
+app.use('/product', productRouter);
 
 app.use(globalErrorHandler);
+
+app.get('/dashboard', authMiddleware, async (_req, res, next) => {
+  try {
+    res.json("dssd").send();
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
