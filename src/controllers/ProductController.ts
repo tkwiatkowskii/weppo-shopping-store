@@ -1,9 +1,8 @@
 import ProductSearchParameters from "../models/product.models/ProductSearchParameters.js";
-import { Product } from "../infrastructure/models/index.js";
 import ProductDto from "../models/product.models/ProductDto.js";
 import ProductsSummaryDto from "../models/product.models/ProductsSummaryDto.js";
 import getProductsService from "../services/product.services/getProductsService.js";
-
+import createProductService from "../services/product.services/createProductService.js";
 
 export default class ProductController {
 
@@ -14,7 +13,7 @@ export default class ProductController {
     return getProductsService(searchParams);
   };
 
-  public static AddProduct(product: ProductDto): void {
+  public static addProduct(product: ProductDto): void {
     createProductService(product);
   }
 }
