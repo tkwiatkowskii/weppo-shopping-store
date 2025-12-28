@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { configureSequelizeSessionMiddleware } from './middleware/configureSequelizeSessionMiddleware.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import productRouter from './routes/products.routes.js'
+import authRouter from './routes/auth.routes.js'
 
 try {
   await sequelize.authenticate();
@@ -33,12 +34,13 @@ const globalErrorHandler: ErrorRequestHandler =
       message: 'Internal server error'
     });
   };
-  
+
 app.use('/product', productRouter);
+app.use('/', authRouter);
 
 app.use(globalErrorHandler);
 
-app.get('/dashboard', authMiddleware, async (_req, res, next) => {
+app.get('/test', authMiddleware, async (_req, res, next) => {
   try {
     res.json("dssd").send();
   } catch (err) {
