@@ -1,13 +1,16 @@
-import type { Express } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import ProductSearchParameters from '../models/product.models/ProductSearchParameters.js';
-import { bindQueryParametersToModel, productIsValid } from './route.helpers.js';
+import {
+  bindQueryParametersToModel,
+  productIsValid,
+  updatedProductIsValid
+} from './route.helpers.js';
 import ProductController from '../controllers/ProductController.js';
-import { updatedProductIsValid } from './route.helpers.js';
 import UpdateProductDto from '../models/product.models/UpdateProductDto.js';
 
-function getProductsRoute(app: Express) {
-  app.get('/get-products', async (req, res, next) => {
+const router = Router();
 
+router.get('/get-products', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productSearchParams = bindQueryParametersToModel<ProductSearchParameters>(
       req,
@@ -15,89 +18,73 @@ function getProductsRoute(app: Express) {
     );
 
     const data = await ProductController.getProducts(productSearchParams);
-
     res.json(data);
   } catch (err) {
-    next(err); 
-    return;
+    next(err);
   }
-  });
-};
+});
 
-function addProductsRoute(app: Express) {
-  app.post('/add-product', async (req, res, next) => {
-    try {
-      const ProductDto = await req.body;
+router.post('/add-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const productDto = req.body;
 
-      if (!productIsValid(ProductDto)) {
-        return res.status(400).json({
-          message: 'Missing required product fields'
-        });
-      }
-
-      const createdProduct = await ProductController.addProduct(ProductDto);
-
-      return res.status(201).json({
-        message: 'Product created successfully',
-        product: createdProduct
+    if (!productIsValid(productDto)) {
+      res.status(400).json({
+        message: 'Missing required product fields'
       });
-    } catch (err) {
-      next(err);
-      return;
     }
-  });
-}
 
-async function updateProductsRoute(app: Express) {
-  app.put('/update-product', async (req, res, next) => {
-    try {
-      const updatedProduct: UpdateProductDto = await req.body;
+    const createdProduct = await ProductController.addProduct(productDto);
 
-      if (!updatedProductIsValid(updatedProduct)) {
-        return res.status(400).json({
-          message: 'Missing required product fields'
-        });
-      } else {
-        const updatedRows = await ProductController
-          .updateProduct(updatedProduct);
-        return res.status(201).json({
-          message: 'Product updated successfully',
-          updatedRows: updatedRows
-        });
-      }
-    } catch (err) {
-      next(err);
-      return;
+    res.status(201).json({
+      message: 'Product created successfully',
+      product: createdProduct
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/update-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const updatedProduct: UpdateProductDto = req.body;
+
+    if (!updatedProductIsValid(updatedProduct)) {
+      res.status(400).json({
+        message: 'Missing required product fields'
+      });
     }
-  });
-};
 
-async function deleteProductsRoute(app: Express) {
-  app.delete('/delete-product', async (req, res, next) => {
-    try {
-      const productToBeDeleted = req.query["name"]?.toString();
+    const updatedRows = await ProductController.updateProduct(updatedProduct);
 
-      if (!productToBeDeleted) {
-        return res.status(400).json({
-          message: 'Missing required product fields'
-        });
-      } else {
-        const deletedRows = await ProductController.deleteProduct(productToBeDeleted);
-        return res.status(201).json({
-          message: 'Product deleted successfully',
-          deletedRows: deletedRows
-        });
-      }
-    } catch (err) {
-      next(err);
-      return;
+    res.status(200).json({
+      message: 'Product updated successfully',
+      updatedRows
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/delete-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const productToBeDeleted = req.query["name"]?.toString();
+
+    if (!productToBeDeleted) {
+      res.status(400).json({
+        message: 'Missing required product fields'
+      });
     }
-  });
-};
 
-export {
-  getProductsRoute,
-  addProductsRoute,
-  updateProductsRoute,
-  deleteProductsRoute
-}
+    const deletedRows = await ProductController.deleteProduct(productToBeDeleted!);
+
+    res.status(200).json({
+      message: 'Product deleted successfully',
+      deletedRows
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default router;
