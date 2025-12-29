@@ -3,13 +3,15 @@ import ProductSearchParameters from '../models/product.models/ProductSearchParam
 import {
   bindQueryParametersToModel,
   productIsValid,
-  updatedProductIsValid
+  updatedProductIsValid,
+  validateQueryParameterIdReturnParsedId
 } from './route.helpers.js';
 import UpdateProductDto from '../models/product.models/UpdateProductDto.js';
 import getProductsService from '../services/product.services/getProductsService.js';
 import createProductsService from '../services/product.services/createProductService.js';
 import updateProductService from '../services/product.services/updateProductService.js';
 import deleteProductService from '../services/product.services/deleteProductService.js';
+import isAdminMiddleware from '../middleware/isAdminMiddleware.js';
 
 const router = Router();
 
@@ -27,7 +29,7 @@ router.get('/get-products', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-router.post('/add-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post('/add-product', isAdminMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const productDto = req.body;
 
@@ -48,7 +50,7 @@ router.post('/add-product', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-router.put('/update-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.put('/update-product', isAdminMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const updatedProduct: UpdateProductDto = req.body;
 
@@ -69,17 +71,15 @@ router.put('/update-product', async (req: Request, res: Response, next: NextFunc
   }
 });
 
-router.delete('/delete-product', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/delete-product', isAdminMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const productToBeDeleted = req.query["name"]?.toString();
+    const productId = validateQueryParameterIdReturnParsedId(req, res);
 
-    if (!productToBeDeleted) {
-      res.status(400).json({
-        message: 'Missing required product fields'
-      });
+    if (productId === null) {
+      return;
     }
 
-    const deletedRows = await deleteProductService(productToBeDeleted!);
+    const deletedRows = await deleteProductService(productId);
 
     res.status(200).json({
       message: 'Product deleted successfully',

@@ -12,13 +12,13 @@ export default async function updateProductService(
         stock: product.newStock
       },
       {
-        where: { name: product.name } 
+        where: { id: product.id } 
       });
 
     if (updatedRows === 0) {
-      console.log(`No product found with name "${product.name}"`);
+      console.log(`No product found with id "${product.id}"`);
     } else {
-      console.log(`Product "${product.name}" updated successfully`);
+      console.log(`Product "${product.id}" updated successfully`);
     }
 
     return updatedRows;
