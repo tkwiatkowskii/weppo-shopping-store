@@ -5,8 +5,11 @@ import {
   productIsValid,
   updatedProductIsValid
 } from './route.helpers.js';
-import ProductController from '../controllers/ProductController.js';
 import UpdateProductDto from '../models/product.models/UpdateProductDto.js';
+import getProductsService from '../services/product.services/getProductsService.js';
+import createProductsService from '../services/product.services/createProductService.js';
+import updateProductService from '../services/product.services/updateProductService.js';
+import deleteProductService from '../services/product.services/deleteProductService.js';
 
 const router = Router();
 
@@ -17,7 +20,7 @@ router.get('/get-products', async (req: Request, res: Response, next: NextFuncti
       new ProductSearchParameters()
     );
 
-    const data = await ProductController.getProducts(productSearchParams);
+    const data = await getProductsService(productSearchParams);
     res.json(data);
   } catch (err) {
     next(err);
@@ -34,7 +37,7 @@ router.post('/add-product', async (req: Request, res: Response, next: NextFuncti
       });
     }
 
-    const createdProduct = await ProductController.addProduct(productDto);
+    const createdProduct = await createProductsService(productDto);
 
     res.status(201).json({
       message: 'Product created successfully',
@@ -55,7 +58,7 @@ router.put('/update-product', async (req: Request, res: Response, next: NextFunc
       });
     }
 
-    const updatedRows = await ProductController.updateProduct(updatedProduct);
+    const updatedRows = await updateProductService(updatedProduct);
 
     res.status(200).json({
       message: 'Product updated successfully',
@@ -76,7 +79,7 @@ router.delete('/delete-product', async (req: Request, res: Response, next: NextF
       });
     }
 
-    const deletedRows = await ProductController.deleteProduct(productToBeDeleted!);
+    const deletedRows = await deleteProductService(productToBeDeleted!);
 
     res.status(200).json({
       message: 'Product deleted successfully',
