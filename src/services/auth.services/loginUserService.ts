@@ -2,9 +2,11 @@ import crypto from 'crypto';
 import type { Request } from 'express';
 import { User, Password, Role } from '../../infrastructure/models/index.js';
 import { Result } from '../../types/result.js';
+import type { SessionData } from 'express-session';
 
 export default async function loginUserService(
   email: string,
+  username: string,
   password: string,
   req: Request
 ): Promise<Result> {
@@ -15,11 +17,17 @@ export default async function loginUserService(
   }) as any;
 
   if (!user || !user.Password) {
-    const result: Result = {
+    return {
       success: false,
       reason: "Account doesn't exist"
-    }
-    return result;
+    };
+  }
+
+  if (user.username !== username) {
+    return {
+      success: false,
+      reason: "Username does not match"
+    };
   }
 
   const { salt, iterations, hashedPassword } = user.Password;
@@ -29,18 +37,21 @@ export default async function loginUserService(
     .toString('hex');
 
   if (hashAttempt !== hashedPassword) {
-    const result: Result = {
+    return {
       success: false,
       reason: "Wrong password"
-    }
-    return result;
+    };
   }
 
-  req.session.userId = user.id;
-  req.session.roles = user.Roles.map(role => role.roleName);
+  const session = req.session as SessionData & {
+    userId?: number;
+    roles?: string[];
+  };
 
-  const result: Result = {
+  session.userId = user.id;
+  session.roles = user.Roles.map((role: any) => role.roleName);
+
+  return {
     success: true
-  }
-  return result;
+  };
 }

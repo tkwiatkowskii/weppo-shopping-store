@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import type { Request } from 'express';
 import { User, Password, Role } from '../../infrastructure/models/index.js';
 import { Result } from '../../types/result.js';
+import { SessionData } from 'express-session';
 
 export default async function registerUserService(
   username: string,
@@ -39,8 +40,9 @@ export default async function registerUserService(
   const role = await Role.findOne({ where: { roleName: 'user' } });
   await (user as any).addRole(role);
 
-  req.session.userId = user.id;
-  req.session.roles = ['user'];
+  const session = req.session as SessionData & { userId?: number; roles?: string[] };
+  session.userId = user.id;
+  session.roles = ['user'];
 
   const result: Result = {
     success: true
