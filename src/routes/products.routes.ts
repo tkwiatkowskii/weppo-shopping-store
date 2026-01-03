@@ -12,12 +12,11 @@ import createProductsService from '../services/product.services/createProductSer
 import updateProductService from '../services/product.services/updateProductService.js';
 import deleteProductService from '../services/product.services/deleteProductService.js';
 import isAdminMiddleware from '../middleware/isAdminMiddleware.js';
-import isLoggedInMiddleware from '../middleware/isLoggedInMiddleware.js';
 import { Result } from '../types/result.js';
 
 const router = Router();
 
-router.get('/get-products', isLoggedInMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/get-products', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productSearchParams = bindQueryParametersToModel<ProductSearchParameters>(
       req,
