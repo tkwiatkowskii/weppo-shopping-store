@@ -16,9 +16,10 @@ router.get('/users', isAdminMiddleware, async (_req, res, next) => {
   }
 });
 
-router.get('/orders', isAdminMiddleware, async (_req, res, next) => {
+router.get('/orders', isAdminMiddleware, async (req, res, next) => {
   try {
-    const orders = await getAllOrdersForAdminService();
+    const { status } = req.query;
+    const orders = await getAllOrdersForAdminService(status);
     res.status(200).json({
       orders: orders
     });

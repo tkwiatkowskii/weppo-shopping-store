@@ -1,7 +1,14 @@
 import { Order, OrderItem, Product, User } from '../../infrastructure/models/index.js';
 
-export default async function getAllOrdersForAdminService() {
+export default async function getAllOrdersForAdminService(status) {
+  const where = {} as any;
+
+  if (status === 'placed' || status === 'open') {
+    where.status = status;
+  }
+  
   const orders = await Order.findAll({
+    where,
     include: [
       {
         model: User,
