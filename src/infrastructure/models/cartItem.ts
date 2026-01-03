@@ -11,7 +11,7 @@ const CartItem = sequelize.define(
   }
 },
 {
-    tableName: 'cart_items',
+  tableName: 'cart_items',
 });
 
 export default CartItem;

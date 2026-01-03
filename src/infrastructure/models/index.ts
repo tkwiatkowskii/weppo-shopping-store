@@ -5,6 +5,8 @@ import CartItem from './cartItem.js';
 import Role from './role.js';
 import UserRole from './userRole.js';
 import Password from './password.js';
+import Order from './order.js';
+import OrderItem from './orderItem.js';
 
 User.hasMany(CartItem, { foreignKey: 'userId' });
 CartItem.belongsTo(User, { foreignKey: 'userId' });
@@ -18,6 +20,15 @@ Role.belongsToMany(User, { through: UserRole, foreignKey: 'roleId' });
 User.hasOne(Password, { foreignKey: 'userId' });
 Password.belongsTo(User, { foreignKey: 'userId' });
 
+User.hasMany(Order, { foreignKey: 'userId' });
+Order.belongsTo(User, { foreignKey: 'userId' });
+
+Order.hasMany(OrderItem, { foreignKey: 'orderId' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
+
+Product.hasMany(OrderItem, { foreignKey: 'productId' });
+OrderItem.belongsTo(Product, { foreignKey: 'productId' });
+
 export { 
   sequelize, 
   User, 
@@ -25,5 +36,7 @@ export {
   CartItem,
   Password,
   UserRole,
-  Role
+  Role,
+  Order,
+  OrderItem
 };
