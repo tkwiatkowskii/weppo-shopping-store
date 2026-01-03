@@ -1,8 +1,10 @@
 import UpdateProductDto from "../../models/product.models/UpdateProductDto.js";
 import { Product } from "../../infrastructure/models/index.js";
+import { Result } from "../../types/result.js";
 
 export default async function updateProductService(
-  product: UpdateProductDto): Promise<number> {
+  product: UpdateProductDto
+): Promise<Result<number>> {
   try {
     const [updatedRows] = await Product.update(
       {
@@ -15,13 +17,21 @@ export default async function updateProductService(
         where: { id: product.id } 
       });
 
+    let result: Result<number>;
+
     if (updatedRows === 0) {
-      console.log(`No product found with id "${product.id}"`);
+      result = {
+        reason: `No product found with id "${product.id}"`,
+        success: false
+      }
     } else {
-      console.log(`Product "${product.id}" updated successfully`);
+      result = {
+        success: true,
+        value: updatedRows
+      }
     }
 
-    return updatedRows;
+    return result;
   } catch (error) {
     console.error("Error updating product:", error);
     throw error;
