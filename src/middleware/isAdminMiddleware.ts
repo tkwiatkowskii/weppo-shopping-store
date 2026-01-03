@@ -13,7 +13,9 @@ export default function isAdminMiddleware(
   }
 
   if (!session.roles || !session.roles.includes('admin')) {
-    return res.status(403).send('Access denied');
+    return res.status(403).json({
+      message: 'Access denied'
+    });
   }
 
   next();
