@@ -6,8 +6,7 @@ import productRouter from './routes/products.routes.js'
 import authRouter from './routes/auth.routes.js'
 import cartRouter from './routes/cart.routes.js'
 import userInformationRouter from './routes/userInformation.routes.js'
-import seedProducts from './infrastructure/seeders/seedProduct.js';
-import seedAdmin from './infrastructure/seeders/seedAdmin.js';
+
 
 try {
   await sequelize.authenticate();
@@ -15,8 +14,8 @@ try {
     // force: true, 
     logging: console.log 
   });
-  seedProducts();
-  seedAdmin();
+  // seedProducts();
+  // seedAdmin();
   console.log('Connection has been established successfully.');
 } catch (error) {
   console.error('Unable to perform basic operations on database:', error);
