@@ -2,16 +2,24 @@ import express, { ErrorRequestHandler} from 'express';
 import { sequelize } from './infrastructure/models/index.js';
 import bodyParser from 'body-parser';
 import { configureSequelizeSessionMiddleware } from './middleware/configureSequelizeSessionMiddleware.js';
-import authMiddleware from './middleware/authMiddleware.js';
 import productRouter from './routes/products.routes.js'
 import authRouter from './routes/auth.routes.js'
+import cartRouter from './routes/cart.routes.js'
+import userInformationRouter from './routes/userInformation.routes.js'
+import seedProducts from './infrastructure/seeders/seedProduct.js';
+import seedAdmin from './infrastructure/seeders/seedAdmin.js';
 
 try {
   await sequelize.authenticate();
-  await sequelize.sync({ force: true, logging: console.log });
+  await sequelize.sync({
+    // force: true, 
+    logging: console.log 
+  });
+  seedProducts();
+  seedAdmin();
   console.log('Connection has been established successfully.');
 } catch (error) {
-  console.error('Unable to connect to the database:', error);
+  console.error('Unable to perform basic operations on database:', error);
   process.exit(1);
 }
 const app = express();
@@ -37,16 +45,10 @@ const globalErrorHandler: ErrorRequestHandler =
 
 app.use('/product', productRouter);
 app.use('/', authRouter);
+app.use('/cart', cartRouter);
+app.use('/admin', userInformationRouter);
 
 app.use(globalErrorHandler);
-
-app.get('/test', authMiddleware, async (_req, res, next) => {
-  try {
-    res.json("dssd").send();
-  } catch (err) {
-    next(err);
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
