@@ -12,10 +12,12 @@ import createProductsService from '../services/product.services/createProductSer
 import updateProductService from '../services/product.services/updateProductService.js';
 import deleteProductService from '../services/product.services/deleteProductService.js';
 import isAdminMiddleware from '../middleware/isAdminMiddleware.js';
+import isLoggedInMiddleware from '../middleware/isLoggedInMiddleware.js';
+import { Result } from '../types/result.js';
 
 const router = Router();
 
-router.get('/get-products', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/get-products', isLoggedInMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productSearchParams = bindQueryParametersToModel<ProductSearchParameters>(
       req,
@@ -23,7 +25,9 @@ router.get('/get-products', async (req: Request, res: Response, next: NextFuncti
     );
 
     const data = await getProductsService(productSearchParams);
-    res.json(data);
+    res.status(200).json({
+      data: data
+    });
   } catch (err) {
     next(err);
   }
@@ -60,11 +64,20 @@ router.put('/update-product', isAdminMiddleware, async (req: Request, res: Respo
       });
     }
 
-    const updatedRows = await updateProductService(updatedProduct);
+    const updatedRowsResult: Result<number> = await updateProductService(updatedProduct);
+
+    if(!updatedRowsResult.success) {
+      res.status(404).json({
+        message: updatedRowsResult.reason
+      });
+      return;
+    }
+
+    const updatedRows = updatedRowsResult.value;
 
     res.status(200).json({
       message: 'Product updated successfully',
-      updatedRows
+      numberOfUpdatedRows: updatedRows
     });
   } catch (err) {
     next(err);
@@ -73,17 +86,31 @@ router.put('/update-product', isAdminMiddleware, async (req: Request, res: Respo
 
 router.delete('/delete-product', isAdminMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const productId = validateQueryParameterIdReturnParsedId(req, res);
+    const productIdResult: Result<number> = validateQueryParameterIdReturnParsedId(req, res);
 
-    if (productId === null) {
+    if(!productIdResult.success) {
+      res.status(400).json({
+        message: productIdResult.reason
+      });
+      return;
+    }
+    
+    const productId = Number(productIdResult.value); 
+
+    const deletedRowsResult: Result<number> = await deleteProductService(productId);
+
+    if(!deletedRowsResult.success) {
+      res.status(404).json({
+        message: deletedRowsResult.reason
+      });
       return;
     }
 
-    const deletedRows = await deleteProductService(productId);
+    const deletedRows = deletedRowsResult.value;
 
     res.status(200).json({
       message: 'Product deleted successfully',
-      deletedRows
+      numberOfDeletedRows: deletedRows
     });
   } catch (err) {
     next(err);

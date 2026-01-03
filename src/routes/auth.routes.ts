@@ -31,10 +31,10 @@ router.get('/login', (_req, _res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
   try {
-    const result = await loginUserService(email, password, req);
+    const result = await loginUserService(email, username, password, req);
 
     if (!result.success) {
       // res.render('login', { error: result.reason });

@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { Result } from "../types/result.js";
 
 export function bindQueryParametersToModel<T>
   (req: any, model: T) {
@@ -14,7 +15,6 @@ export function bindQueryParametersToModel<T>
 
 export function productIsValid(product: any): boolean {
   return product && 
-    product.id &&
     product.name && 
     product.category && 
     product.price !== null && 
@@ -32,24 +32,32 @@ export function updatedProductIsValid(product: any): boolean {
 
 export function validateQueryParameterIdReturnParsedId(
   req: Request,
-  res: Response): number | null {
+  _res: Response): Result<number> {
   const idParam = req.query['id'];
 
   if (!idParam || Array.isArray(idParam)) {
-    res.status(400).json({
-      message: 'Missing or invalid product id'
-    });
-    return null;
+    const result: Result = {
+      success: false,
+      reason: 'Missing or invalid product id'
+    }
+
+    return result;
   }
 
   const productId = parseInt(idParam as string, 10);
 
   if (isNaN(productId)) {
-    res.status(400).json({
-      message: 'Product id must be a number'
-    });
-    return null;
+    const result: Result = {
+      success: false,
+      reason: 'Product id must be a number'
+    }
+
+    return result;
   }
 
-  return productId;
+  const result: Result<number> = {
+    success: true,
+    value: productId
+  }
+  return result;
 }
