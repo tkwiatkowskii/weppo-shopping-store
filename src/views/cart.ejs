@@ -67,3 +67,29 @@
         </div>
     <% } %>
 </div>
+<script>
+document.getElementById('final-confirm-btn').addEventListener('click', async () => {
+    if(!confirm("Czy na pewno chcesz złożyć zamówienie?")) return;
+
+    try {
+        const response = await fetch('/cart/place-order', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Sukces! Zamówienie złożone. Kupiono produktów: ' + data.numberOfDifferentProductsBought);
+            window.location.href = '/product/get-products';
+        } else {
+            alert('Błąd: ' + (data.message || 'Nie udało się złożyć zamówienia'));
+        }
+    } catch (err) {
+        console.error('Błąd wysyłania:', err);
+        alert('Błąd połączenia z serwerem.');
+    }
+});
+</script>
