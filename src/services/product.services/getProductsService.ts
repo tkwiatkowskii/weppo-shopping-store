@@ -21,16 +21,17 @@ export default async function getProductsService(
   const querySortOrder = searchParams.sortOrder;
   const querySortType = searchParams.sortType;
 
-  const PAGE_SIZE = 10;
-  const offset = searchParams.page * PAGE_SIZE;
+ const PAGE_SIZE = (searchParams as any).limit || 12; 
 
-  try {
-    const result = await Product.findAndCountAll({
-      where: whereClause,
-      limit: PAGE_SIZE,
-      offset: offset,
-      order: [[`${querySortType}`, `${querySortOrder}`]]
-    });
+const offset = searchParams.page * PAGE_SIZE;
+
+try {
+  const result = await Product.findAndCountAll({
+    where: whereClause,
+    limit: PAGE_SIZE, 
+    offset: offset,
+    order: [[`${querySortType}`, `${querySortOrder}`]]
+  });
 
     const productDtos = result.rows.map(row => new ProductDto(row));
 

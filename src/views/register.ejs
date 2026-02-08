@@ -1,0 +1,31 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Rejestracja</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Rejestracja</h2> <form action="/register" method="POST" class="auth-form">
+      <div class="input-group">
+        <input type="text" name="Username" placeholder="Username" required>
+      </div>
+      <div class="input-group">
+        <input type="email" name="Email" placeholder="Email" required>
+      </div>
+      <div class="input-group">
+        <input type="password" name="Password" placeholder="Password" required>
+      </div>
+      
+      <button type="submit" class="btn-auth">Zarejestruj</button>
+    </form>
+
+    <% if (typeof error !== 'undefined' && error) { %> 
+      <p class="error-text"><%= error %></p> 
+    <% } %>
+    
+    <p class="auth-footer">
+      Masz już konto? <a href="/login">Zaloguj się</a>
+    </p>
+  </div>
+</div>

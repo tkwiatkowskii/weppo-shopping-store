@@ -13,22 +13,35 @@ import updateProductService from '../services/product.services/updateProductServ
 import deleteProductService from '../services/product.services/deleteProductService.js';
 import isAdminMiddleware from '../middleware/isAdminMiddleware.js';
 import { Result } from '../types/result.js';
+import getAllUsersForAdminService from '../services/userInformation.services/getAllUsersForAdminService.js';
+import getAllOrdersService from '../services/userInformation.services/getAllOrdersService.js';
+
+
 
 const router = Router();
 
-router.get('/get-products', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/get-products', async (req: Request, res: Response, _next: NextFunction) => {
   try {
+    const queryPage = req.query['page'];
+    const pageInput = parseInt(queryPage as string);
+    const validPage = isNaN(pageInput) ? 0 : pageInput;
+
     const productSearchParams = bindQueryParametersToModel<ProductSearchParameters>(
       req,
       new ProductSearchParameters()
     );
-
+    productSearchParams['page'] = validPage;
     const data = await getProductsService(productSearchParams);
-    res.status(200).json({
-      data: data
+
+    res.render('index', {
+      data: data,
+      query: req.query,
+      errorMessage: null,
+      session: req.session
     });
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    console.error("!!! BŁĄD KRYTYCZNY W TRASIE !!!", err);
+    res.status(500).send("Wystąpił błąd: " + err.message);
   }
 });
 
@@ -40,14 +53,13 @@ router.post('/add-product', isAdminMiddleware, async (req: Request, res: Respons
       res.status(400).json({
         message: 'Missing required product fields'
       });
+      return;
     }
 
-    const createdProduct = await createProductsService(productDto);
+   await createProductsService(productDto);
 
-    res.status(201).json({
-      message: 'Product created successfully',
-      product: createdProduct
-    });
+    
+    res.redirect('/product/admin');
   } catch (err) {
     next(err);
   }
@@ -116,4 +128,37 @@ router.delete('/delete-product', isAdminMiddleware, async (req: Request, res: Re
   }
 });
 
+router.get('/admin', isAdminMiddleware, async (req, res, next) => {
+  try {
+    const queryPage = req.query['page'];
+    const pageInput = parseInt(queryPage as string);
+    const validPage = isNaN(pageInput) ? 0 : pageInput;
+
+    const defaultParams = {
+      category: 'any',
+      name: 'any',
+      page: validPage,
+      limit: 100,
+      sortOrder: 'ASC',
+      sortType: 'id',
+    };
+
+    const productsSummary = await getProductsService(defaultParams as any); 
+    
+    const status = req.query['status'] as string | undefined;
+    const users = await getAllUsersForAdminService();
+    const orders = await getAllOrdersService(status);
+
+    console.log("Admin Panel: Rendering with", productsSummary.products.length, "products");
+
+    res.render('admin', { 
+      products: productsSummary.products,
+      users: users, 
+      orders: orders,
+    });
+  } catch (err) {
+    console.error("Błąd w trasie admina:", err);
+    next(err);
+  }
+});
 export default router;

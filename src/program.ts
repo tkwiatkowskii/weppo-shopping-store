@@ -6,7 +6,7 @@ import productRouter from './routes/products.routes.js'
 import authRouter from './routes/auth.routes.js'
 import cartRouter from './routes/cart.routes.js'
 import userInformationRouter from './routes/userInformation.routes.js'
-
+import path from 'path';
 
 try {
   await sequelize.authenticate();
@@ -22,16 +22,16 @@ try {
   process.exit(1);
 }
 const app = express();
-
+app.use(express.static(path.join(process.cwd(), 'public')));
 const PORT = 3000;
 
 configureSequelizeSessionMiddleware(app, sequelize);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-
+app.use(express.static('public'));
 app.set('view engine', 'ejs');
-app.set('views', './views');
+app.set('views', './src/views');
 
 const globalErrorHandler: ErrorRequestHandler =
   (err, _req, res, _next) => {

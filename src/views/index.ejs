@@ -1,0 +1,107 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Teaffee</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<div class="navbar">
+  <a href="/product/get-products" class="nav-logo">SKLEP</a>
+
+  <% if (typeof session !== 'undefined' && session.user) { %>
+    <div class="user-welcome">
+      <span>Witaj, <strong><%= session.user %></strong>!</span>
+
+      <% if (session.role && session.role.toLowerCase() === 'admin') { %>
+        <a href="/product/admin" class="btn-admin">Panel Admina</a>
+      <% } %>
+
+      <form action="/logout" method="POST" class="logout-form">
+        <button type="submit" class="btn-logout">Wyloguj</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="guest-nav">
+      <a href="/login" class="nav-link">Logowanie</a>
+      <a href="/register" class="nav-link">Rejestracja</a>
+      <span class="welcome-text">Witaj, gościu!</span>
+    </div>
+  <% } %>
+
+  <a href="/cart" class="cart-button">
+    🛒 Mój Koszyk
+  </a>
+</div>
+
+<% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+  <div class="error-message">
+    <strong>Uwaga!</strong> <%= errorMessage %>
+  </div>
+<% } %>
+
+<form action="/product/get-products" method="GET" class="filter-section">
+  
+  <input type="text" name="name" placeholder="Szukaj nazwy..." value="<%= query.name || '' %>">
+  
+  <select name="category">
+    <option value="">Wszystkie kategorie</option>
+    <option value="Kawa" <%= query.category === 'Kawa' ? 'selected' : '' %>>Kawa</option>
+    <option value="Sprzet" <%= query.category === 'Sprzet' ? 'selected' : '' %>>Sprzęt</option>
+    <option value="Herbata" <%= query.category === 'Herbata' ? 'selected' : '' %>>Herbata</option>
+  </select>
+
+  <select name="sortType">
+    <option value="name" <%= query.sortType === 'name' ? 'selected' : '' %>>Po nazwie</option>
+    <option value="price" <%= query.sortType === 'price' ? 'selected' : '' %>>Po cenie</option>
+  </select>
+
+  <select name="sortOrder">
+    <option value="asc" <%= query.sortOrder === 'asc' ? 'selected' : '' %>>Rosnąco</option>
+    <option value="desc" <%= query.sortOrder === 'desc' ? 'selected' : '' %>>Malejąco</option>
+  </select>
+
+  <button type="submit" class="btn-filter">Filtruj i sortuj</button>
+  
+  <a href="/product/get-products" class="btn-clear">Wyczyść filtry</a>
+
+</form>
+
+<hr>
+
+<div class="products-grid">
+  <% if (data && data.products && data.products.length > 0) { %>
+    <% data.products.forEach(product => { %>
+      <div class="product-card">
+        <img src="/images/products/<%= product.id %>.jpg" 
+             onerror="this.src='https://via.placeholder.com/300?text=Kawa+Premium'" 
+             alt="<%= product.name %>">
+        
+        <div class="product-info">
+          <h3><%= product.name %></h3>
+          <p class="price"><%= product.price %> zł</p>
+          <p><small>Kategoria: <%= product.category %></small></p>
+          <p>Dostępność: <%= product.stock %> szt.</p>
+        </div>
+
+        <form action="/cart/add-to-cart?productId=<%= product.id %>&addQuantity=1" method="POST">
+          <button type="submit" class="btn-add-cart">Dodaj do koszyka</button>
+        </form>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align: center; grid-column: 1 / -1; padding: 50px;">
+        Aktualnie brak produktów w tej kategorii.
+    </p>
+  <% } %>
+</div>
+
+<div class="pagination">
+  <% if (data.currentPage > 0) { %>
+    <a href="/product/get-products?page=<%= Number(data.currentPage) - 1 %>">⬅ Poprzednia</a>
+  <% } %>
+  
+  <span class="page-info">Strona <%= Number(data.currentPage) + 1 %> z <%= data.totalPages %></span>
+  
+  <% if (Number(data.currentPage) + 1 < data.totalPages) { %>
+    <a href="/product/get-products?page=<%= Number(data.currentPage) + 1 %>">Następna ➡</a>
+  <% } %>
+</div>

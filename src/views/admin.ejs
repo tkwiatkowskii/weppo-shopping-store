@@ -1,0 +1,178 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<div class="admin-container">
+    <h1>Panel Zarządzania Sklepem</h1>
+
+    <section class="admin-section">
+        <h3>Dodaj nowy produkt</h3>
+        <form action="/product/add-product" method="POST" class="admin-form-add">
+            <input type="text" name="name" placeholder="Nazwa" required>
+            <input type="text" name="category" placeholder="Kategoria" required>
+            <input type="number" step="0.01" name="price" placeholder="Cena" required>
+            <input type="number" name="stock" placeholder="Stan magazynowy" required>
+            <button type="submit" class="btn-add">Dodaj produkt</button>
+        </form>
+    </section>
+
+    <section class="admin-section">
+        <h3>Lista towarów i modyfikacja</h3>
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Obecne dane</th>
+                        <th>Modyfikacja</th>
+                        <th>Akcja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach(p => { %>
+                        <tr>
+                            <td class="text-bold"><%= p.id %></td>
+                            <td>
+                                <div class="product-preview">
+                                    <strong><%= p.name %></strong><br>
+                                    <small>Kat: <%= p.category %></small><br>
+                                    <span class="price-tag"><%= p.price %> zł</span> | Stan: <%= p.stock %>
+                                </div>
+                            </td>
+                            <td>
+                                <form id="update-form-<%= p.id %>" class="update-inline-form">
+                                    <input type="hidden" name="id" value="<%= p.id %>">
+                                    <input type="text" name="newName" placeholder="Nowa nazwa">
+                                    <input type="text" name="newCategory" placeholder="Nowa kat.">
+                                    <input type="number" step="0.01" name="newPrice" placeholder="Cena">
+                                    <input type="number" name="newStock" placeholder="Stan">
+                                    <button type="button" class="btn-update" onclick="updateProduct('<%= p.id %>')">Aktualizuj</button>
+                                </form>
+                            </td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteProduct('<%= p.id %>')">Usuń</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h3>Zarejestrowani Użytkownicy</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(u => { %>
+                    <tr>
+                        <td><strong><%= u.username %></strong></td>
+                        <td><%= u.email %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="admin-section">
+        <h3>Wszystkie Zamówienia</h3>
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Klient</th>
+                        <th>Status</th>
+                        <th>Produkty</th>
+                        <th>Suma</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(o => { %>
+                        <tr>
+                            <td>#<%= o.orderId %></td>
+                            <td>
+                                <strong><%= o.user.username %></strong><br>
+                                <small><%= o.user.email %></small>
+                            </td>
+                            <td><span class="status-badge"><%= o.status %></span></td>
+                            <td>
+                                <ul class="items-list">
+                                    <% o.items.forEach(item => { %>
+                                        <li><%= item.name %> (<%= item.quantity %> szt.)</li>
+                                    <% }) %>
+                                </ul>
+                            </td>
+                            <td class="text-bold"><%= Number(o.total).toFixed(2) %> zł</td>
+                            <td><small><%= new Date(o.createdAt).toLocaleString() %></small></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <script>
+    async function updateProduct(productId) {
+        const form = document.getElementById(`update-form-${productId}`);
+        
+        // Pobieramy dane z pól - sprawdzamy małe/duże litery w name!
+        const data = {
+            id: Number(productId),
+            newName: form.querySelector('input[name="newName"]').value,
+            newCategory: form.querySelector('input[name="newCategory"]').value,
+            newPrice: Number(form.querySelector('input[name="newPrice"]').value),
+            newStock: Number(form.querySelector('input[name="newStock"]').value)
+        };
+
+        console.log("Wysyłam dane aktualizacji:", data);
+
+        try {
+            const response = await fetch('/product/update-product', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Produkt zaktualizowany pomyślnie!');
+                location.reload();
+            } else {
+                const err = await response.json();
+                alert('Błąd aktualizacji: ' + (err.message || 'Sprawdź dane DTO'));
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Błąd połączenia z serwerem');
+        }
+    }
+
+    async function deleteProduct(productId) {
+        if (!confirm('Czy na pewno chcesz usunąć produkt o ID ' + productId + '?')) return;
+
+        try {
+            const response = await fetch(`/product/delete-product?id=${productId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Produkt usunięty!');
+                location.reload();
+            } else {
+                const err = await response.json();
+                alert('Błąd: ' + (err.message || 'Nie udało się usunąć'));
+            }
+        } catch (error) {
+            console.error('Błąd sieci:', error);
+            alert('Wystąpił błąd komunikacji');
+        }
+    }
+</script>
+</div>

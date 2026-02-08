@@ -1,0 +1,69 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Koszyk</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<div class="cart-container">
+    <h2>Twój Koszyk</h2>
+
+    <% if (products.length === 0) { %>
+        <div class="empty-cart">
+            <p>Twój koszyk jest jeszcze pusty. Może czas na małą kawę?</p>
+            <a href="/product/get-products" class="btn-filter">Wróć na zakupy</a>
+        </div>
+    <% } else { %>
+        <% let totalSum = 0; %>
+
+        <div class="cart-table-wrapper">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Cena jedn.</th>
+                        <th>Ilość</th>
+                        <th>Suma</th>
+                    
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach(p => { %>
+                        <% let rowSum = p.price * p.quantity; %>
+                        <% totalSum += rowSum; %>
+                        <tr>
+                            <td><strong><%= p.name %></strong></td>
+                            <td><%= p.price %> zł</td>
+                            <td class="qty-cell">
+                                <div class="qty-controls">
+                                    <form action="/cart/remove?productId=<%= p.id %>&removeQuantity=1" method="POST">
+                                        <button type="submit" class="btn-qty btn-minus">-</button>
+                                    </form>
+                                    <span class="qty-number"><%= p.quantity %></span>
+                                    <form action="/cart/add-to-cart?productId=<%= p.id %>&addQuantity=1" method="POST">
+                                        <button type="submit" class="btn-qty btn-plus">+</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <td class="row-sum"><%= rowSum.toFixed(2) %> zł</td>
+                            <td>
+                                </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right"><strong>Razem do zapłaty:</strong></td>
+                        <td colspan="2" class="total-price"><%= totalSum.toFixed(2) %> zł</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="cart-actions">
+            <button id="final-confirm-btn" class="btn-checkout">
+                Złóż zamówienie i zapłać: <%= totalSum.toFixed(2) %> zł
+            </button>
+            <a href="/product/get-products" class="btn-back">← Kontynuuj zakupy</a>
+        </div>
+    <% } %>
+</div>

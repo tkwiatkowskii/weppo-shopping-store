@@ -13,30 +13,21 @@ router.post('/add-to-cart', isLoggedInMiddleware, async (req, res, next) => {
   try {
     const result: Result<[number, number, number]> = await addToCartService(req, res);
     if (!result.success) {
-      if (result.reason === 'Invalid productId') {
-        res.status(404).json({
-          message: result.reason
-        })
-      }
-      else {
-        res.status(400).json({
-          message: result.reason
-        })
-      }
-      return;
+      return res.redirect('/product/get-products?error=' + result.reason);
     }
+    res.redirect('/cart'); 
+  } catch (err) {
+    next(err);
+  }
+});
 
-    if(result.value === undefined) {
-      console.log("Typescript idk");
-      return;
-    }
-    
-    const [productQuantity, productId, lineTotal] = result.value;
-    res.status(200).json({
-      productQuantity: productQuantity,
-      productId: productId,
-      lineTotal: lineTotal
-    })
+router.get('/', isLoggedInMiddleware, async (req, res, next) => {
+  try {
+    const items = await getCartProductsService(req);
+    const products = items.map(item => new CartProductDto(item.Product, (item as any).quantity));
+    res.render('cart', {
+      products: products
+    });
   } catch (err) {
     next(err);
   }
@@ -48,9 +39,11 @@ router.get('/', isLoggedInMiddleware, async (req, res, next) => {
 
     const products = items.map(item => new CartProductDto(item.Product, (item as any).quantity));
 
-    res.status(200).json({
-      products: products
-    });
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache'); 
+   res.render('cart', {
+      products: products});
   } catch (err) {
     next(err);
   }
@@ -94,9 +87,7 @@ router.post('/remove', isLoggedInMiddleware, async (req, res, next) => {
       return;
     }
 
-    res.status(200).json({
-      newQuantity: result.value
-    });
+    res.redirect('/cart');
   } catch (err) {
     next(err);
   }

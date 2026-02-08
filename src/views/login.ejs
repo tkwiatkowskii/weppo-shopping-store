@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie - Coffee Shop</title>
+    <link rel="stylesheet" href="/css/style.css"> </head>
+</head>
+<body>
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Logowanie</h2>
+    
+    <form action="/login" method="POST" class="auth-form">
+      <div class="input-group">
+        <input type="text" name="username" placeholder="Username" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="email" name="email" placeholder="Email" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+      
+      <button type="submit" class="btn-auth">Zaloguj</button>
+    </form>
+
+    <% if (typeof error !== 'undefined' && error) { %> 
+      <p class="error-text"><%= error %></p> 
+    <% } %>
+    
+    <p class="auth-footer">
+      Nie masz konta? <a href="/register">Zarejestruj się</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>
